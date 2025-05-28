@@ -126,7 +126,7 @@ The Server is an external program or service that exposes capabilities to AI mod
 
 A key advantage of this architecture is its modularity. A single Host can connect to multiple Servers simultaneously via different Clients. New Servers can be added to the ecosystem without requiring changes to existing Hosts. Capabilities can be easily composed across different Servers.
 
-#### Quiz 1: MCP Fundamentals
+### Quiz 1: MCP Fundamentals
 
 - Q1: What is the primary purpose of Model Context Protocol (MCP)?
     - To enable AI models to connect with external data sources, tools, and environments
@@ -138,3 +138,112 @@ A key advantage of this architecture is its modularity. A single Host can connec
     - The user-facing AI application
 - Q5: What does “M×N Integration Problem” refer to in the context of AI applications?
     -  The challenge of connecting M AI applications to N external tools without a standard
+
+### The Communication Protocol
+
+MCP defines a standardized communication protocol that enables Clients and Servers to exchange messages in a consistent, predictable way.
+
+#### JSON-RPC: The Foundation
+
+MCP uses JSON-RPC 2.0 as the message format for all communication between Clients and Servers. JSON-RPC is:
+- Human-readable
+- Language-agnostic
+- Well-established
+
+<table>
+    <tr>
+        <td><img src="../images/5.png" alt="With MCP" width="700"/></td>
+    </tr>
+    <tr>
+        <td align="center">The protocol defines 3 types of messages: Requests, Responses and Notifications</td>
+    </tr>
+</table>
+
+##### 1. Requests
+Sent from Client to Server to initiate an operation.
+```
+{
+    "jsonrpc": "2.0",
+    "id": 1,                        # >>> a unique identifier
+    "method": "tools/call",         # >>> method name to invoke
+    "params": {
+    "name": "weather",
+    "arguments": {
+        "location": "San Francisco" # >>> parameters for the method if any
+    }
+    }
+}
+```
+
+##### 2. Responses
+Sent from Server to Client in reply to a Request.
+```
+{
+    "jsonrpc": "2.0",
+    "id": 1,                        # >>> same ID as the corresponding request
+    "result": {                     # >>> a result (for sucess) or an error (for failure)
+    "temperature": 62,
+    "conditions": "Partly cloudy"
+    }
+}
+```
+
+##### 3. Notifications
+Sent from Server to Client to provide updates or notifications about events. Don't require a response. 
+```
+{
+    "jsonrpc": "2.0",
+    "method": "progress",
+    "params": {
+    "message": "Processing data...",
+    "percent": 50
+    }
+}
+```
+
+#### Transport Mechanism
+JSON-RPC defines the message format, but MCP specifies how these messages are trasnported. 
+
+##### stdio (Standard Input/Output) mechanism
+**stdio** is used for local communication, where the Client and Server run on the same machine.
+- Local tools like file system access or running local scripts.
+
+##### HTTP + SSE (Server-Sent Events) / Streamable HTTP mechanism
+
+**HTTP+SSE** is used for remote communication between Client and Server, where each can be on different machines. In this case the Server uses SSE to push updates to the Client over a persisten connection. 
+- remote APIs, cloud services, etc.
+
+#### [The Interaction Lifecycle](https://huggingface.co/learn/mcp-course/unit1/communication-protocol)
+
+```
+A[Initialization: Client establishes connection to Server] 
+A --> B[Discovery: Client queries Server for available capabilities]
+B --> C[Execution: Client invokes specific capability on Server]
+C --> D[Termination: Connection is closed or session ends]
+```
+
+### Undestanding MCP Capabilities
+
+MCP capabilities fall into four main categories: Tools, Resources, Prompts and Sampling.
+
+#### Tools
+Tools are executable functions or actions that AI model can invoke through the MCP protocol. Tools are **model-controlled** and due to the ability of **perform actions**, it can be dangerous. (Use Cases: Sending messages, creating tickets, querying APIs, performing calculations.)
+
+#### Resources
+Resources provide **read-only** access, allowing AI model to retrieve context without executing complex logic. (Use Cases: Accessing file contents, retrieving database records, reading configuration information.)
+
+#### Prompts
+Prompts are predefined templates that guides the interaction between user, AI model and Server's capabilities. (Use Cases: Common workflows, specialized task templates, guided interactions.)
+
+#### Sampling
+Sampling enables server-driven agentic behaviors, allowing Servers to request the Client to perform LLM interactions. (Use Cases: Complex multi-step tasks, autonomous agent workflows, interactive processes.)
+
+<table>
+    <tr>
+        <td><img src="../images/mcp_capabilites.png" alt="MCP Capabilities" width="900"/></td>
+    </tr>
+    <tr>
+        <td align="center">How MCP Capabilities Work Together</td>
+    </tr>
+</table>
+

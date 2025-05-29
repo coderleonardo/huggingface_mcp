@@ -247,3 +247,77 @@ Sampling enables server-driven agentic behaviors, allowing Servers to request th
     </tr>
 </table>
 
+See more in [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)
+
+### Quiz 2: MCP SDK
+
+-  Q1: What is the main purpose of the MCP SDKs?
+    - Make easier to implement MCP clients and servers
+- Q2: Which functionalities do the MCP SDKs typically handle?
+    - Message serialization/deserialization
+- Q4: What command is used to start a development MCP server using a Python file named server.py ?
+    - `mcp dev server.py`
+- Q5: What is the role of JSON-RPC 2.0 in MCP?
+    - As the message format for all communication between Clients and Servers
+
+### [MCP Clients](https://huggingface.co/learn/mcp-course/unit1/mcp-clients)
+
+We can think the *Host* as our main application (like an AI assistant or IDE) and the *Client* as a specialized module within that Host responsible for handling MCP communications.
+
+#### User Interface Clients
+
+- Chat Interface Clients
+- Interactive Development Clients
+    - Cursor, Continue.dev, etc.
+
+#### Configuring MCP Clients
+
+##### MCP Configuration Files
+
+MCP hosts use configuration files to manage server connections. These files define which servers are available and how to connect to them.
+
+**mcp.json**
+```
+{
+  "servers": [
+    {
+      "name": "Server Name",
+      "transport": {
+        "type": "stdio|sse",
+        // Transport-specific configuration
+      }
+    }
+  ]
+}
+```
+
+**Configuration for stdio Transport (local script)**
+```
+{
+  "servers": [
+    {
+      "name": "File Explorer",
+      "transport": {
+        "type": "stdio",
+        "command": "python",
+        "args": ["/path/to/file_explorer_server.py"]
+      }
+    }
+  ]
+}
+```
+
+**Configuration for HTTP+SSE Transport (for remote servers)**
+```
+{
+  "servers": [
+    {
+      "name": "Remote API Server",
+      "transport": {
+        "type": "sse",
+        "url": "https://example.com/mcp-server"
+      }
+    }
+  ]
+}
+```
